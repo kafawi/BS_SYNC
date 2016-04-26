@@ -7,29 +7,36 @@ void * produce(FifoT * buffer, char * cList, pthread_cond_t * cond){
    int i=0;
    int fail=0;
    fail = pthread_mutex_init(&mutex, NULL);
+   puterr("ccp.c produce: mutex_init", fail);
    fail = pthread_cond_init(&finish, NULL);
+   puterr("ccp.c produce: cond init finish", fail);
    
    while(1){                 //alive
       fail = pthread_mutex_lock(&mutex);
+      puterr("ccp.c produce: mutex_lock", fail);
       //not running & alive // stop by control 
       fail = pthread_cond_wait(cond, &mutex);
-      if (i >= cList.length){
-         pthread_cond_signal(finish);
+      puterr("ccp.c produce: cond_wait mutex", fail);
+      if (i >= sizeof(cList)){
+         pthread_cond_signal(&finish);
       }
        // witing because finish 
-      fail = pthread_cond_wait(finish, &mutex);
+      fail = pthread_cond_wait(&finish, &mutex);
+      puterr("ccp.c produce: cond_wait finish", fail);
       
-      sleep(SLEEP_TIME_PRODUCE_SEK);
-      push(&buffer, cList[i]);
-      i++
-      pthread_mutex_unlock(&mutex);
+      //fail = sleep(SLEEP_TIME_PRODUCE_SEK);
+      puterr("ccp.c produce: sleep", fail);
+      push(buffer, cList[i]);
+      i++;
+      fail = pthread_mutex_unlock(&mutex);
+      puterr("ccp.c produce: cond_wait finish", fail);
    }
    return 0;
    
 }
-
+// hie ist der fehler
 void * produceThread(void * arg){
-   ProduceParam * p = arg;
+   ProduceParam * p = (ProduceParam * ) arg;
    produce(p->buffer, p->cList, p->cond);
 }
 
@@ -48,8 +55,8 @@ void * consume(FifoT * buffer, pthread_cond_t * cond){
       puterr("ccp.c consume: cond_wait", fail);
       fail = sleep(SLEEP_TIME_CONSUME_SEK);
       puterr("ccp.c consume: sleep", fail);
-      // wenn nix mehr im Puffer ist, wartet er im Puffer dann ist er fertig
-      output = pop(&buffer); 
+      // wenn nix mehr im Puffer ist, wartet er im Puffer wegen semaphoren
+      output = pop(buffer); 
       putchar(output);
       fail = pthread_mutex_unlock(&mutex);
       puterr("ccp.c consume: mutex_unlock", fail);
@@ -58,7 +65,7 @@ void * consume(FifoT * buffer, pthread_cond_t * cond){
 }
 
 void * consumeThread(void * arg){
-   ConsumeParam * p = arg;
+   ConsumeParam * p =(ConsumeParam *) arg;
    consume(p->buffer, p->cond);
 }
 
@@ -68,35 +75,35 @@ void * control(
    pthread_cond_t * consumeCV
 ){
    int fail=0;
-
-   while(isRunning){
+   char tmp = 0;
+   while(1){
 
       tmp=getchar();
       switch(tmp){
 
          case'1': 
             fail = pthread_cond_signal(produce1CV);
-            puterr("ccp.c control: cond_signal(produce1CV)" fail);
+            puterr("ccp.c control: cond_signal(produce1CV)", fail);
             break;
 
          case'2': 
             fail = pthread_cond_signal(produce2CV);
-            puterr("ccp.c control: cond_signal(produce2CV)" fail);
+            puterr("ccp.c control: cond_signal(produce2CV)", fail);
             break;
 
          case'C':
          case'c': 
             fail = pthread_cond_signal(consumeCV);
-            puterr("ccp.c control: cond_signal(consumeCV)" fail);
+            puterr("ccp.c control: cond_signal(consumeCV)", fail);
             break;
          case 'Q':
          case 'q':
-            fail = pthread_exit(NULL);
-            puterr("ccp.c control: thread_exit" fail);
+            pthread_exit(NULL);
             break;
+         case 'H':
          case 'h':
             fail = printf(HELP_TXT1, HELP_TXT2);
-            puterr("ccp.c control: printf" fail);
+            puterr("ccp.c control: printf", fail);
          default:
             break;
 
@@ -106,8 +113,7 @@ void * control(
 }
 
 void * controlThread(void * arg){
-   ControlParam * p = arg;
-   control(p->buffer, p->cList, p->cond);
+   ControlParam * p = (ControlParam *)arg;
+      if(p->produce1CV == NULL){puts("hello");}
+   control(p->produce1CV, p->produce2CV, p->consumeCV);
 }
-
-

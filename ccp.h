@@ -5,14 +5,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
+#include <unistd.h>
 #include "fifo.h"
 #include "errInfo.h"
 
-#define SLEEP_TIME_CONSUME_SEK 2
-#define SLEEP_TIME_PRODUCE_SEK 3
+#define SLEEP_TIME_CONSUME_SEK 2L
+#define SLEEP_TIME_PRODUCE_SEK 3L
 
-#define HELP_TXT1 "n1: start/stop Poducer 1 n2:start/stop Producer2 %s"
-#define HELP_TXT2 "nC/c: start/stop Consumer nQ/q: quit"
+#define HELP_TXT1 "1: start/stop Poducer 1 \n2:start/stop Producer2 %s"
+#define HELP_TXT2 "\nC/c: start/stop Consumer \nQ/q: quit\n"
 
 typedef struct {
    FifoT * buffer;

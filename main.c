@@ -36,27 +36,34 @@ void init(){
    controlParam->produce2CV = &produce2CV;
    controlParam->consumeCV = &consumeCV;
    
+   pthread_create(&controller, NULL,controlThread, (void *)controlParam);
+   
    consumeParam = malloc(sizeof(*consumeParam));
    consumeParam->buffer = &buffer;
    consumeParam->cond = &consumeCV;
    
+   pthread_create(&consumer, NULL, consumeThread,  (void *)consumeParam);
+
    produceParam1 = malloc(sizeof(*produceParam1));
    produceParam1->buffer = &buffer;
    produceParam1->cList = abcLowerCase;
    produceParam1->cond = &consumeCV;
+   
+   pthread_create(&producer1, NULL, produceThread, (void *)produceParam1);
    
    produceParam2 = malloc(sizeof(*produceParam2));
    produceParam2->buffer = &buffer;
    produceParam2->cList = abcUpperCase;
    produceParam2->cond = &consumeCV;
    
+   pthread_create(&producer2, NULL, produceThread, (void *)produceParam2);
+   
    // init threads
-   
-   
-   pthread_create(&controller, NULL,controlThread,controlParam);
-   pthread_create(&consumer, NULL, consumeThread, consumeParam);
-   pthread_create(&producer1, NULL, produceThread, produceParam1);
-   pthread_create(&producer2, NULL, produceThread, produceParam1);
+  
+   //pthread_create(&controller, NULL,controlThread, (void *)controlParam);
+   //pthread_create(&consumer, NULL, consumeThread,  (void *)consumeParam);
+   //pthread_create(&producer1, NULL, produceThread, (void *)produceParam1);
+   //pthread_create(&producer2, NULL, produceThread, (void *)produceParam2);
 }
 
 

@@ -5,13 +5,13 @@ CC = /usr/bin/gcc
 CFAGS = -Wall -ggdb
 LDFLAGS = -lpthread
 
-SRC = fifo.c errInfo.c ccp.c main.c fifo.h ccp.h errInfo.h
+SRC = fifo.c errInfo.c ccp.c main.c  fifo.h ccp.h errInfo.h
 OBJ = $(SRC:%.c=%.o)
 
 
 ####
 proc: $(OBJ) 
-	$(CC) -o proc $(OBJ)
+	$(CC) -o proc $(OBJ) $(LDFLAGS) $(CFLAGS)
 	
 	
 
@@ -34,5 +34,5 @@ $(BIN) :
 # Aufraeumen
 
 clean:
-	rm -rf $(BIN) $(OBJ) $(DEPENDFILE) 
+	rm -rf $(BIN) *.o $(DEPENDFILE)
 	rm -rf proc
