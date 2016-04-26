@@ -3,6 +3,9 @@
 
 #include <semaphore.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errorno.h>
 
 
 struct typedef {
@@ -13,16 +16,16 @@ struct typedef {
    pthread_mutex_t mutex;
    sem_t taken;
    sem_t free;
-} fifo_t;
+} FifoT;
 
-//typedef struct buffer  fifo_t;
+//typedef struct buffer  FifoT;
 
-void init(fifo_t *buffer, int size);
+void initFifo(FifoT *buffer, int size);
 
-void push(fifo_t *buffer, char data);
+void push(FifoT *buffer, char data);
 
-char pop(fifo_t *buffer);
+char pop(FifoT *buffer);
 
-void destroy(fifo_t *buffer);
+void destroy(FifoT *buffer);
 
 #endif /* FIFO_H_ */

@@ -1,80 +1,97 @@
 #include "fifo.h"
-#include <stdio.h>
-#include <stdlib.h>
 
-void initFifo(fifo_t *buffer, int size){
+void initFifo(FifoT *buffer, int size){
+   int fail=0;
    int i=0;
-   sem_init(&buffer->taken,0, 0);
-   sem_init(&buffer->free,1, size);
-   pthread_mutex_init(&buffer->mutex, NULL);
+   
+   fail = sem_init(&buffer->taken,0, 0);
+   puterr("fifo initFifo: sem_init taken",fail);
+   fail = sem_init(&buffer->free,1, size);
+   puterr("fifo initFifo: sem_init free",fail);
+   fail = pthread_mutex_init(&buffer->mutex, NULL);
+   puterr("fifo initFifo: mutex_init",fail);
    buffer->size=size;
    buffer->first=0;
    buffer->last=size;
    buffer->element = malloc(sizeof(buffer->element)*size);
+   if (buffer->element == NULL){
+      perror("fifo iniFifo: malloc " )
+   }
    for (i=0; i< size; i++){
       buffer->element[i]=0;
    }
 }
 
-void upFirst(fifo_t *buffer){
+void upFirst(FifoT *buffer){
    buffer->first++;
    if (buffer->first >= buffer->size){
       buffer->first=0;
    }
 }
-void upLast( fifo_t *buffer){
+void upLast( FifoT *buffer){
    buffer->last++;
    if (buffer->last >= buffer->size){
       buffer->last=0;
    }
 }
 
-void push( fifo_t *buffer, char data){
-   sem_wait(&buffer->free);
-   pthread_mutex_lock(&buffer->mutex);
+void push( FifoT *buffer, char data){
+   int fail =0;
+   
+   fail = sem_wait(&buffer->free);
+   puterr("fifo push: sem_wait free",fail);
+   
+   fail = pthread_mutex_lock(&buffer->mutex);
+   puterr("fifo push: mutex_lock",fail);
+   
    upLast(buffer);
    buffer->element[buffer->last] = data;
+   
+   
    pthread_mutex_unlock(&buffer->mutex);
+   puterr("fifo push: mutex_unlock",fail);
+   
    sem_post(&buffer->taken);
+   puterr("fifo push: sem_post taken",fail);
 }
 
-char pop( fifo_t *buffer){
+char pop( FifoT *buffer){
    char element = 0;
-   sem_wait(&buffer->taken);
-   pthread_mutex_lock(&buffer->mutex);
+   int fail =0;
+   
+   fail = sem_wait(&buffer->taken);
+   puterr("fifo pop: sem_wait taken",fail);
+   
+   fail = pthread_mutex_lock(&buffer->mutex);
+   puterr("fifo pop: mutex_lock",fail);
+   
    element = buffer->element[buffer->first];
    upFirst(buffer);
-   pthread_mutex_unlock(&buffer->mutex);
-   sem_post(&buffer->free);
+
+   fail = pthread_mutex_unlock(&buffer->mutex);
+   puterr("fifo pop: mutex_unlock",fail);
+   
+   fail = sem_post(&buffer->free);
+   puterr("fifo pop: sem_post free",fail);
+   
    return element;
 }
 
-void destroy( fifo_t *buffer){
-   //int errTmp= errno;
-   free(buffer->element);
-   // print fehler
-   pthread_mutex_destroy(&buffer->mutex);
-   // print fehler
-   sem_destroy(&buffer->free);
-   sem_destroy(&buffer->taken);
+void destroy( FifoT *buffer){
+   int fail=0;
+   
+   fail = free(buffer->element);
+   puterr("free Fifos char array",fail);
+   
+   fail = pthread_mutex_destroy(&buffer->mutex);
+   puterr("Destroying Fifos mutex",fail);
+   
+   fail = sem_destroy(&buffer->free);
+   puterr("Destroying Fifos sem_t free",fail);
+   
+   fail = sem_destroy(&buffer->taken);
+   puterr("Destroying Fifos sem_t taken",fail);
    // print fehler
 }
 
 
-int main() {
-   fifo_t buffer;
-   init(&buffer,10);
-   char data[] = {'a','b','c','d','e','f','g','h','i','j','k'};
-   int i;
-   for (i=0;i<11;i++){
-      printf("push: %c", data[i]);
-      push(&buffer, data[i]);
-	  printf(" %c\n", buffer.element[i]);
-   }
-   printf("\n");
-   for (i=0;i<10;i++){
-      printf("pop: %c\n", pop(&buffer));
-   }
-destroy(&buffer);
-}
-//print fehler methode bauen. 

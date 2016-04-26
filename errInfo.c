@@ -1,12 +1,10 @@
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
+#include "errInfo.h"
 
-#define S_ERROR_TXT "Failure at %s:"
+
 char txt[100];
 
-int puterr(char * s, int anyfail){
-   if( anyfail == -1 ){
+int puterr(char * s, int fail){
+   if( fail != 0 ){
       fprints(txt, S_ERROR_TXT, s);
       perror(s);
    }

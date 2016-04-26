@@ -5,10 +5,10 @@
  *      Author: Sandy
  */
 
-#include "fifo.h"
+
 #include "ccp.h"
 
-char sHelp[130] = strcat("\n1: start/stop Poducer 1 \n2:start/stop ", 
+char const HELP_TXT[130] = strcat("\n1: start/stop Poducer 1 \n2:start/stop ", 
    "Producer2 \nC/c: start/stop Consumer \nQ/q: terminate all" )
 
 pthread_mutex_t producer1_mutex;
@@ -26,7 +26,7 @@ char productList2[] = {'A','B','C','D','E','F','G','H','I','J','K','L',
 int pos1 = 0;
 int pos2 = 0;
 
-fifo_t *buffer = NULL;
+FifoT *buffer = NULL;
 
 int isRunning = 1; // Controller thread
 
@@ -94,7 +94,24 @@ void* consumer_thread(void* arg){
    return 0;
 }
 
-void * readFromBuffer(fifo_t){
+void* consume(pthread_cond_t consumer_cv, pthread_mutex_t consumer_mutex){
+
+   pthread_mutex_init(&consumer_mutex, NULL);
+   pthread_cond_init(&consumer_cv, NULL);
+
+   while(consumer_thread){                    //alive
+      pthread_mutex_lock(&consumer_mutex);
+      while(!consumer_thread){               //not running && alive
+         pthrad_cond_wait(&consumer_cv, &consumer_mutex);
+      }
+      readFromBuffer(buffer);
+      pthread_mutex_unlock(&consumer_mutex);
+   }
+   return 0;
+}
+
+
+void * readFromBuffer(FifoT){
    char tmp;
    printf("Consumer: consuming %c\n",(tmp));  //welches tmp bloß..
    sleep(2);
@@ -102,7 +119,7 @@ void * readFromBuffer(fifo_t){
    return 0;
 }
 
-controller(void* p){
+void controller(void* p){
    char tmp=-1;
    int prod1=1;
    int prod2=1;
@@ -154,7 +171,7 @@ controller(void* p){
             //terminate all
             break;
          case 'h':
-            printf(sHelp);
+            printf(HELP_TXT);
          default:
             printf("\nController Thread Error: Invalid input")
             break;
