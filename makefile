@@ -5,18 +5,17 @@ CC = /usr/bin/gcc
 CFAGS = -Wall -ggdb
 LDFLAGS = -lpthread
 
-SRC = fifo.c errInfo.c ccp.c main.c
+SRC = fifo.c errInfo.c ccp.c main.c fifo.h ccp.h errInfo.h
 OBJ = $(SRC:%.c=%.o)
 
 
 ####
-all: main $(DEPENDFILE)
-	rename main proc main
+proc: $(OBJ) 
+	$(CC) -o proc $(OBJ)
+	
 	
 
 DEPENDFILE = .depend
-
-
 
 # Berechne Abhaengigkeiten der SRC Datei
 #

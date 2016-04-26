@@ -1,0 +1,7 @@
+fifo.o: fifo.c fifo.h errInfo.h
+errInfo.o: errInfo.c errInfo.h
+ccp.o: ccp.c ccp.h fifo.h errInfo.h
+main.o: main.c fifo.h errInfo.h ccp.h
+fifo.o: fifo.h errInfo.h
+ccp.o: ccp.h fifo.h errInfo.h
+errInfo.o: errInfo.h

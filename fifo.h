@@ -5,10 +5,10 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errorno.h>
+#include "errInfo.h"
 
 
-struct typedef {
+typedef struct {
    char *element;
    int size;
    int last;
@@ -26,6 +26,6 @@ void push(FifoT *buffer, char data);
 
 char pop(FifoT *buffer);
 
-void destroy(FifoT *buffer);
+void destroyFifo(FifoT *buffer);
 
 #endif /* FIFO_H_ */

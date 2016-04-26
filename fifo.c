@@ -15,7 +15,7 @@ void initFifo(FifoT *buffer, int size){
    buffer->last=size;
    buffer->element = malloc(sizeof(buffer->element)*size);
    if (buffer->element == NULL){
-      perror("fifo iniFifo: malloc " )
+      perror("fifo iniFifo: malloc " );
    }
    for (i=0; i< size; i++){
       buffer->element[i]=0;
@@ -77,11 +77,9 @@ char pop( FifoT *buffer){
    return element;
 }
 
-void destroy( FifoT *buffer){
+void destroyFifo( FifoT *buffer){
    int fail=0;
-   
-   fail = free(buffer->element);
-   puterr("free Fifos char array",fail);
+   free(buffer->element);
    
    fail = pthread_mutex_destroy(&buffer->mutex);
    puterr("Destroying Fifos mutex",fail);
