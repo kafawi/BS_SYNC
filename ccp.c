@@ -15,16 +15,16 @@ void * produce(FifoT * buffer, char * cList, pthread_cond_t * cond){
       fail = pthread_mutex_lock(&mutex);
       puterr("ccp.c produce: mutex_lock", fail);
       //not running & alive // stop by control 
-      fail = pthread_cond_wait(cond, &mutex);
+      //fail = pthread_cond_wait(cond, &mutex);
       puterr("ccp.c produce: cond_wait mutex", fail);
       if (i >= sizeof(cList)){
          pthread_cond_signal(&finish);
       }
-       // witing because finish 
+       // waiting because finish till main kills it.
       fail = pthread_cond_wait(&finish, &mutex);
       puterr("ccp.c produce: cond_wait finish", fail);
       
-      //fail = sleep(SLEEP_TIME_PRODUCE_SEK);
+      fail = sleep(SLEEP_TIME_PRODUCE_SEK);
       puterr("ccp.c produce: sleep", fail);
       push(buffer, cList[i]);
       i++;
@@ -35,9 +35,10 @@ void * produce(FifoT * buffer, char * cList, pthread_cond_t * cond){
    
 }
 // hie ist der fehler
-void * produceThread(void * arg){
-   ProduceParam * p = (ProduceParam * ) arg;
+void * produceThread(void *arg) {
+   ProduceParam * p = (ProduceParam *) arg;
    produce(p->buffer, p->cList, p->cond);
+   return 0;
 }
 
 
@@ -67,6 +68,7 @@ void * consume(FifoT * buffer, pthread_cond_t * cond){
 void * consumeThread(void * arg){
    ConsumeParam * p =(ConsumeParam *) arg;
    consume(p->buffer, p->cond);
+   return 0;
 }
 
 
@@ -77,10 +79,9 @@ void * control(
    int fail=0;
    char tmp = 0;
    while(1){
-
+	  // könte blockieren warum auch immer
       tmp=getchar();
       switch(tmp){
-
          case'1': 
             fail = pthread_cond_signal(produce1CV);
             puterr("ccp.c control: cond_signal(produce1CV)", fail);
@@ -104,6 +105,7 @@ void * control(
          case 'h':
             fail = printf(HELP_TXT1, HELP_TXT2);
             puterr("ccp.c control: printf", fail);
+			break;
          default:
             break;
 
@@ -114,6 +116,6 @@ void * control(
 
 void * controlThread(void * arg){
    ControlParam * p = (ControlParam *)arg;
-      if(p->produce1CV == NULL){puts("hello");}
    control(p->produce1CV, p->produce2CV, p->consumeCV);
+   return 0;
 }

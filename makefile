@@ -2,17 +2,18 @@
 #
 
 CC = /usr/bin/gcc
-CFAGS = -Wall -ggdb
+CFLAGS = -Wall -ggdb
 LDFLAGS = -lpthread
 
-SRC = fifo.c errInfo.c ccp.c main.c  fifo.h ccp.h errInfo.h
+SRC = fifo.c errInfo.c ccp.c main.c fifo.h ccp.h errInfo.h
 OBJ = $(SRC:%.c=%.o)
 
-
 ####
+
 proc: $(OBJ) 
 	$(CC) -o proc $(OBJ) $(LDFLAGS) $(CFLAGS)
-	
+
+all: proc
 	
 
 DEPENDFILE = .depend
@@ -35,4 +36,3 @@ $(BIN) :
 
 clean:
 	rm -rf $(BIN) *.o $(DEPENDFILE)
-	rm -rf proc
