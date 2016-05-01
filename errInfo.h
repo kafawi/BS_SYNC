@@ -10,4 +10,11 @@
 
 int puterr(char * s, int fail);
 
+// MACRO
+
+
+    #define MELDUNG(text) fprintf( stderr, \
+            "Datei [%s], Zeile %d: %s\n" \
+            __FILE__, __LINE__, text )
+
 #endif /* ERRINFO_H_ */

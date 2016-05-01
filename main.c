@@ -1,20 +1,20 @@
 #include "fifo.h"
 #include "errInfo.h"
-#include "ccp.h"
+#include "pcc.h"
 #include <pthread.h>
 
 #define FIFOSIZE 10
 
 
 
-   pthread_t producer1, producer2 , consumer, controller;
+   pthread_t producer1, producer2 , consumer, controler;
    pthread_cond_t produce1CV, produce2CV , consumeCV;
    FifoT * buffer;
 
-   ControlParam * controlParam=NULL;
-   ConsumeParam * consumeParam=NULL;
-   ProduceParam * produceParam1=NULL;
-   ProduceParam * produceParam2=NULL;
+   ArgControl * argControl=NULL;
+   ArgConsume * argConsume=NULL;
+   ArgProduce * argProduce1=NULL;
+   ArgProduce * argProduce2=NULL;
 
 
 void init(){
@@ -32,42 +32,42 @@ void init(){
    // init ParameterList
 
 
-   controlParam = (ControlParam*) malloc(sizeof(*controlParam));
-   controlParam->produce1CV = &produce1CV;
-   controlParam->produce2CV = &produce2CV;
-   controlParam->consumeCV  = &consumeCV;
+   argControl = (ArgControl *) malloc(sizeof(*argControl));
+   argControl->condProduce1 = produce1CV;
+   argControl->condProduce1 = produce2CV;
+   argControl->condConsume  = consumeCV;
 
 
-   consumeParam = (ConsumeParam*)malloc(sizeof(*consumeParam));
-   consumeParam->buffer = buffer;
-   consumeParam->cond = &consumeCV;
+   argConsume = (ArgConsume*)malloc(sizeof(*argConsume));
+   argConsume->buffer = buffer;
+   argConsume->cond = consumeCV;
 
 
-   produceParam1 = (ProduceParam*)malloc(sizeof(*produceParam1));
-   produceParam1->buffer = buffer;
-   produceParam1->cList = abcLowerCase;
-   produceParam1->cond = &consumeCV;
+   argProduce1 = (ArgProduce*)malloc(sizeof(*argProduce1));
+   argProduce1->buffer = buffer;
+   argProduce1->cList = abcLowerCase;
+   argProduce1->cond = produce1CV;
 
 
-   produceParam2 = (ProduceParam*)malloc(sizeof(*produceParam2));
-   produceParam2->buffer = buffer;
-   produceParam2->cList = abcUpperCase;
-   produceParam2->cond = &consumeCV;
+   argProduce2 = (ArgProduce*)malloc(sizeof(*argProduce2));
+   argProduce2->buffer = buffer;
+   argProduce2->cList = abcUpperCase;
+   argProduce2->cond = produce2CV;
 
 
    // init threads
-   pthread_create(&controller,NULL, controlThread, (void *)controlParam);
-   pthread_create(&consumer,  NULL, consumeThread, (void *)consumeParam);
-   pthread_create(&producer1, NULL, produceThread, (void *)produceParam1);
-   pthread_create(&producer2, NULL, produceThread, (void *)produceParam2);
+   pthread_create(&controler, NULL, control, (void *)argControl);
+   pthread_create(&consumer,  NULL, consume, (void *)argConsume);
+   pthread_create(&producer1, NULL, produce, (void *)argProduce1);
+   pthread_create(&producer2, NULL, produce, (void *)argProduce2);
 }
 
 
 void destroy(){
-   free(produceParam1);
-   free(produceParam2);
-   free(controlParam);
-   free(consumeParam);
+   free(argProduce1);
+   free(argProduce2);
+   free(argControl);
+   free(argConsume);
    pthread_cancel(consumer);
    pthread_cancel(producer2);
    pthread_cancel(producer1);
@@ -76,7 +76,7 @@ void destroy(){
 
 int main(){
    init();
-   pthread_join(controller, NULL);
+   pthread_join(controler, NULL);
    destroy();
    return 0;
 }

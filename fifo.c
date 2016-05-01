@@ -6,11 +6,6 @@ FifoT * initFifo(int size){
    //int fail=0;
    int i=0;
    FifoT * buffer = (FifoT*)malloc( sizeof(*buffer) );
-
-
-   if (buffer == NULL){
-      perror("fifo iniFifo: malloc Fifo" );
-   }
    //fail =
    sem_init(&buffer->taken,0, 0);
    //puterr("fifo initFifo: sem_init taken",fail);
@@ -23,7 +18,7 @@ FifoT * initFifo(int size){
    buffer->size=size;
    buffer->first=0;
    buffer->last=size;
-   buffer->element = (char*)malloc( sizeof(buffer->element) *size);
+   buffer->element =(char*) malloc( sizeof(buffer->element) *size);
 
    if (buffer->element == NULL){
       puts("fifo iniFifo: malloc " );

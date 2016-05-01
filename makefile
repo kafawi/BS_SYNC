@@ -6,8 +6,8 @@ CC = /usr/bin/gcc
 CFLAGS = -Wall -ggdb
 LDFLAGS = -lpthread
 
-SRH = fifo.h ccp.h errInfo.h
-SRC = errInfo.c fifo.c ccp.c main.c
+SRH = fifo.h pcc.h errInfo.h
+SRC = errInfo.c fifo.c pcc.c main.c
 OBJ = $(SRC:%.c=%.o)
 
 DEPENDFILE = .depend
@@ -23,7 +23,7 @@ dep: $(SRC) $(SRH)
 -include $(DEPENDFILE)
 
 # Compilieren und linken
-$(BIN) : $(OBJ)
+$(BIN) : $(OBJ) $(SRC)
 	$(CC) -o $(BIN) $(OBJ) $(LDFLAGS)
 
 %.o: %.c
