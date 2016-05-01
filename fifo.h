@@ -1,4 +1,3 @@
-
 #ifndef FIFO_H_
 #define FIFO_H_
 
@@ -8,7 +7,6 @@
 #include <stdlib.h>
 #include "errInfo.h"
 
-
 typedef struct {
    char *element;
    int size;
@@ -16,12 +14,10 @@ typedef struct {
    int first;
    pthread_mutex_t mutex;
    sem_t taken;
-   sem_t free;
+   sem_t empty;
 } FifoT;
 
-//typedef struct buffer  FifoT;
-
-void initFifo(FifoT *buffer, int size);
+FifoT * initFifo(int size);
 
 void push(FifoT *buffer, char data);
 

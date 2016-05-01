@@ -30,3 +30,9 @@
 
 # Debug files
 *.dSYM/
+
+# Make
+.depend
+
+# Atom editor files
+.atom-gdb.json
