@@ -92,3 +92,10 @@ void * control(void * argControl){
    }
    return 0;
 }
+
+
+// das nächste mal blocken mit
+//void locklock(){
+// mutex_lock;
+// mutex_unlock;
+//}
