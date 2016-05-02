@@ -30,9 +30,9 @@ void init(){
    abcUpperCase=ABC_UPPER_CASE;
 
    isAlive = TRUE;
-   isProdBlock1=FALSE;
-   isProdBlock2=FALSE;
-   isConsBlock=FALSE;
+   isProdBlock1 = FALSE;
+   isProdBlock2 = FALSE;
+   isConsBlock = FALSE;
 
    // init Conds
    e=pthread_cond_init(&consBlock, NULL);ERROUT(e);
@@ -43,39 +43,42 @@ void init(){
    argControl = (ArgControl*)malloc(sizeof(*argControl));
    MERROUT(argControl);
    argControl->condProd1=&prodBlock1;
-   argControl->isProdBlock1=FALSE;
+   argControl->isProdBlock1=&isProdBlock1;
+
    argControl->condProd2=&prodBlock2;
-   argControl->isProdBlock2=FALSE;
+   argControl->isProdBlock2=&isProdBlock2;
+
    argControl->condCons=&consBlock;
-   argControl->isConsBlock=FALSE;
+   argControl->isConsBlock=&isConsBlock;
+
    argControl->condQuit=&condQuit;
    argControl->isAlive=&isAlive;
-puts("1");
+
+
    argConsume = (ArgConsume*)malloc(sizeof(*argConsume));
    MERROUT(argConsume);
    argConsume->buffer = buffer;
    argConsume->cond =&consBlock;
-   argConsume->isBlock =argControl->isConsBlock;
+   argConsume->isBlock =&isConsBlock;
    argConsume->isAlive =&isAlive;
-puts("2");
 
    argProduce1 = (ArgProduce*)malloc(sizeof(*argProduce1));
    MERROUT(argProduce1 );
    argProduce1->buffer = buffer;
    argProduce1->cList = abcLowerCase;
    argProduce1->cond = &prodBlock1;
-   argProduce1->isBlock =argControl->isProdBlock1;
+   argProduce1->isBlock =&isProdBlock1;
    argProduce1->isAlive =&isAlive;
 
-puts("3");
 
    argProduce2 = (ArgProduce*)malloc(sizeof(*argProduce2));
    MERROUT(argProduce2);
    argProduce2->buffer = buffer;
    argProduce2->cList = abcUpperCase;
    argProduce2->cond =&prodBlock2;
-   argProduce2->isBlock=argControl->isProdBlock2;
+   argProduce2->isBlock=&isProdBlock2;
    argProduce1->isAlive =&isAlive;
+
 
 
    // init threads
@@ -85,7 +88,7 @@ puts("3");
    pthread_create(&consumer,  NULL, consume, (void *)argConsume);
    pthread_create(&producer2, NULL, produce, (void *)argProduce2);
    pthread_create(&controler, NULL, control, (void *)argControl);
-   puts("2");
+
 }
 
 

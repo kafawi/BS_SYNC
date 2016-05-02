@@ -5,22 +5,19 @@
 
 void * produce(void * argProduce){
    ArgProduce * p = (ArgProduce *) argProduce;
-   pthread_mutex_t mutex;
-   e = pthread_mutex_init(&mutex, NULL); ERROUT(e);
+   pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
    int e=0;
    unsigned int i=0;
-   while(*p->isAlive){
-      if (*p->isBlock == TRUE){
-         e = pthread_mutex_lock(&mutex);ERROUT(e);
+   while(p->isAlive){
+      if (*p->isBlock==TRUE){
          e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
-         e = pthread_mutex_unlock(&mutex);ERROUT(e);
-         p->isBlock=FALSE;
+         *p->isBlock=FALSE;
       }
       e=sleep(WAIT_PRODUCE_SEK);
       push(p->buffer, p->cList[i]);
       i++;
       if (p->cList[i]== 0){
-         *p->isAlive=0;
+         break;
       }
    }
    e = pthread_mutex_destroy(&mutex); ERROUT(e);
@@ -29,16 +26,14 @@ void * produce(void * argProduce){
 
 void * consume(void * argConsume){
    ArgConsume * p = (ArgConsume *) argConsume;
-   pthread_mutex_t mutex;
-   e = pthread_mutex_init(&mutex, NULL); ERROUT(e);
+   pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
    int e=0;
    char output = 0;
-   while(*p->isAlive){
-
-      if (*p->isBlock == TRUE){
-         e = pthread_mutex_lock(&mutex);ERROUT(e);
+   while(p->isAlive){
+      if (*p->isBlock==TRUE){
+         //e = pthread_mutex_lock(&mutex);ERROUT(e);
          e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
-         e = pthread_mutex_unlock(&mutex);ERROUT(e);
+         //e = pthread_mutex_unlock(&mutex);ERROUT(e);
          *p->isBlock=FALSE;
       }
 
