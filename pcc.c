@@ -5,59 +5,80 @@
 
 void * produce(void * argProduce){
    ArgProduce * p = (ArgProduce *) argProduce;
-   int isAlive=1;
+   pthread_mutex_t mutex;
+   e = pthread_mutex_init(&mutex, NULL); ERROUT(e);
    int e=0;
    unsigned int i=0;
-   while(isAlive){
+   while(*p->isAlive){
+      if (*p->isBlock == TRUE){
+         e = pthread_mutex_lock(&mutex);ERROUT(e);
+         e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
+         e = pthread_mutex_unlock(&mutex);ERROUT(e);
+         p->isBlock=FALSE;
+      }
       e=sleep(WAIT_PRODUCE_SEK);
       push(p->buffer, p->cList[i]);
       i++;
-      if (i > 25){
-         isAlive=0;
+      if (p->cList[i]== 0){
+         *p->isAlive=0;
       }
    }
+   e = pthread_mutex_destroy(&mutex); ERROUT(e);
    return 0;
 }
 
-void * consume(void * argConsume){//al
-   ArgConsume * p = (ArgConsume *) argConsume;//al
-   int isAlive=1;
+void * consume(void * argConsume){
+   ArgConsume * p = (ArgConsume *) argConsume;
+   pthread_mutex_t mutex;
+   e = pthread_mutex_init(&mutex, NULL); ERROUT(e);
    int e=0;
    char output = 0;
-   while(isAlive){
-      e = sleep(WAIT_CONSUME_SEK); //ERROUT(e);
+   while(*p->isAlive){
+
+      if (*p->isBlock == TRUE){
+         e = pthread_mutex_lock(&mutex);ERROUT(e);
+         e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
+         e = pthread_mutex_unlock(&mutex);ERROUT(e);
+         *p->isBlock=FALSE;
+      }
+
+      e = sleep(WAIT_CONSUME_SEK); ERROUT(e);
       output = pop(p->buffer);
       // puts because putchar doesnt work, without a additional puts
-      e = puts(&output); //ERROUT(e);
+      e = puts(&output); ERROUT(e);
    }
+   e = pthread_mutex_destroy(&mutex); ERROUT(e);
    return 0;
 }
 
 void * control(void * argControl){
    ArgControl * p = (ArgControl *) argControl;
-   int isAlive=1;
    char tmp = 0;
-   while(isAlive){
+   while(p->isAlive){
       tmp=getchar();
       switch(tmp){
          case'1':
-            pthread_cond_signal(p->condProduce1);
+            e=pthread_cond_signal(p->condProd1); ERROUT(e);
+            *p->isProdBlock1 = TRUE;
             break;
          case'2':
-            pthread_cond_signal(p->condProduce2);
+            e=pthread_cond_signal(p->condProd2); ERROUT(e);
+            *p->isProdBlock2 = TRUE;
             break;
          case'C':
          case'c':
-            pthread_cond_signal(p->condConsume);
+            e=pthread_cond_signal(p->condCons); ERROUT(e);
+            *p->isConsBlock = TRUE;
             break;
          case 'Q':
          case 'q':
+            e=pthread_cond_signal(p->condQuit); ERROUT(e);
             pthread_exit(NULL);
             break;
          case 'H':
          case 'h':
-            puts(HELP_TXT);
-			break;
+            e = puts(HELP_TXT); ERROUT(e);
+         break;
          default:
             break;
       }

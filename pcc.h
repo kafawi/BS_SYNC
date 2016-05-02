@@ -24,17 +24,26 @@ typedef struct {
    FifoT * buffer;
    char * cList;
    pthread_cond_t * cond;
+   int * isBlock;
+   int * isAlive;
 } ArgProduce;
 
 typedef struct {
    FifoT * buffer;
    pthread_cond_t * cond;
+   int * isBlock;
+   int * isAlive;
 } ArgConsume;
 
 typedef struct {
-   pthread_cond_t * condProduce1;
-   pthread_cond_t * condProduce2;
-   pthread_cond_t * condConsume;
+   pthread_cond_t * condProd1;
+   int * isProdBlock1;
+   pthread_cond_t * condProd2;
+   int * isProdBlock2;
+   pthread_cond_t * condCons;
+   int * isConsBlock;
+   pthread_cond_t * condQuit;
+   int * isAlive;
 } ArgControl;
 
 void * produce(void * argProduce);
