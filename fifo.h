@@ -17,7 +17,7 @@ typedef struct {
    sem_t empty;
 } FifoT;
 
-FifoT * initFifo(int size);
+int initFifo(FifoT * buffer, int size);
 
 void push(FifoT *buffer, char data);
 

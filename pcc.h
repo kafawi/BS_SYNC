@@ -10,8 +10,8 @@
 #include "fifo.h"
 #include "errInfo.h"
 
-#define WAIT_CONSUME_SEK 2L
-#define WAIT_PRODUCE_SEK 3L
+#define WAIT_CONSUME_SEK 2
+#define WAIT_PRODUCE_SEK 3
 
 #define HELP_TXT "\
 1:   start/stop Producer for LowerCase\n \
@@ -23,18 +23,18 @@ Q/q: quit\n \
 typedef struct {
    FifoT * buffer;
    char * cList;
-   pthread_cond_t cond;
+   pthread_cond_t * cond;
 } ArgProduce;
 
 typedef struct {
    FifoT * buffer;
-   pthread_cond_t cond;
+   pthread_cond_t * cond;
 } ArgConsume;
 
 typedef struct {
-   pthread_cond_t condProduce1;
-   pthread_cond_t condProduce2;
-   pthread_cond_t condConsume;
+   pthread_cond_t * condProduce1;
+   pthread_cond_t * condProduce2;
+   pthread_cond_t * condConsume;
 } ArgControl;
 
 void * produce(void * argProduce);

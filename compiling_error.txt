@@ -1,0 +1,2 @@
+gcc: fatal error: input file ‘makefile’ is the same as output file
+compilation terminated.

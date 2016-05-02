@@ -1,0 +1,151 @@
+\documentclass[draft=false
+              ,paper=a4
+              ,twoside=false
+              ,fontsize=11pt
+              ,headsepline
+              ,BCOR10mm
+              ,DIV11
+              ]{scrartcl}
+\usepackage[OT2,T1]{fontenc}
+\usepackage[russian,ngerman,english]{babel}
+%% see http://www.tex.ac.uk/cgi-bin/texfaq2html?label=uselmfonts
+
+\usepackage[utf8]{inputenc}
+%\usepackage[latin1]{inputenc}
+\usepackage{libertine}
+\usepackage{pifont}
+\usepackage{microtype}
+\usepackage{textcomp}
+\usepackage[german,refpage]{nomencl}
+\usepackage{setspace}
+\usepackage{makeidx}
+\usepackage{listings}
+\usepackage{natbib}
+\usepackage[ngerman,colorlinks=true]{hyperref}
+\usepackage{soul}
+\usepackage{hawstyle}
+%\usepackage{lipsum} %% for sample text
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+%% define some colors
+\colorlet{BackgroundColor}{gray!20}
+\colorlet{KeywordColor}{blue}
+\colorlet{CommentColor}{black!60}
+%% for tables
+\colorlet{HeadColor}{gray!60}
+\colorlet{Color1}{blue!10}
+\colorlet{Color2}{white}
+
+%% configure colors
+\HAWifprinter{
+  \colorlet{BackgroundColor}{gray!20}
+  \colorlet{KeywordColor}{black}
+  \colorlet{CommentColor}{gray}
+  % for tables
+  \colorlet{HeadColor}{gray!60}
+  \colorlet{Color1}{gray!40}
+  \colorlet{Color2}{white}
+}{}
+\lstset{%
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=1,
+  numbersep=5pt,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{KeywordColor}\bfseries,
+  identifierstyle=\color{black},
+  commentstyle=\color{CommentColor},
+  backgroundcolor=\color{BackgroundColor},
+  captionpos=b,
+  fontadjust=true
+}
+\lstset{escapeinside={(*@}{@*)}, % used to enter latex code inside listings
+        morekeywords={uint32_t, int32_t}
+}
+\ifpdfoutput{
+  \hypersetup{bookmarksopen=false,bookmarksnumbered,linktocpage}
+}{}
+
+%% more fancy C++
+\DeclareRobustCommand{\cxx}{C\raisebox{0.25ex}{{\scriptsize +\kern-0.25ex +}}}
+
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+
+% unknown hyphenations
+\hyphenation{
+}
+
+%% recalculate text area
+\typearea[current]{last}
+
+\makeindex
+\makenomenclature
+
+\begin{document}
+\selectlanguage{ngerman}
+
+\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+
+%%%%%
+%% customize (see readme.pdf for supported values)
+\HAWThesisProperties{
+  Author={Alexander Mendel \& Karl-Fabian Witte},
+  Title={Abgabe: \today},
+  ThesisType={
+    BS Praktikum SS 2016 - Gruppe 2 \\
+    Aufgabenblatt 02 - Entwurf \\ 
+    Synchronisation und Thread Generierung
+  },
+  ReleaseDate={06.Oktober 2015}
+}
+
+\maketitle
+
+\onehalfspacing
+
+\newpage
+\singlespacing
+
+\newpage
+
+\onehalfspacing
+
+\section{Aufgabe}
+  Es soll ein Contoller-Producer-Consumer System in C geschrieben werden. Wobei der Aufgaben wie folgt untereilt werden:
+  \begin{enumerate}
+     \item[Producer\_1 Thread] Schreibt in den Fifo alle 3s ein kleinen Buchstaben aus dem Alphabet. 
+     \item[Producer\_2 Thread] Schreibt in den Fifo alle 3s ein Großen Buchstaben aus dem Alphabet. 
+     \item[Consumer Thread] Nimmt alle 2s ein Zeichen aus dem Puffer und gibt es auf der console aus.
+     \item[Control Thead] Steuerung des Verbraucher-Erzeuger Systems mit Tastatureingaben  
+     \item[Main Thread] Initialisierung und Starten der Threads. Beendet das Programm erst, wenn alle Threads terminiert sind.
+  \end{enumerate} 
+
+\section{Entwurf}
+
+\subsection{module}
+  \begin{enumerate}
+     \item[main.c] main(), init() 
+     \item[pcc.c] control(), consume(), produce\_1(), produce\_2() +,  terminierungsMethoden \newline (ggf. für die Übersicht wird für jede Funktionalität ein eigenes modul erstellt.)
+     \item[fifo.c] initFifo(), pop(), push(input), destroy()
+     \item[errInfo.h] MACRO für Errorhandling
+  \end{enumerate} 
+  Es ist anzumerken, dass die Parameterlisten sowie Rückgabetypen noch nicht entschieden sind. Dies soll nur ein grober überblick der Module sein. Es gibt momentan nämlich noch Probleme mit der Übergabe der Argument mittels Struktur. Im Notfall wird auf andere Übergaben zurückgegriffen.Header werden entsprechend angelegt. 
+  
+  \subsection{Synchronisation und implementierungs Entwurf}
+   Der über den Controller werden mittels pthread\_conds der Consumer und die Producer gesteuert, wo bei über getchar() aus stdio.h der Befehl über das Keyboard gelesen wird und mittels swich-case wird dieser ausgewertet. 
+   
+   Der Fifo ist ein Ring-buffer mit Array und wird mit initFifo() initialisiert. Der Overflow und Underflow wird über eine zwei Semaphoren gesteuert (empty: Anzahl der freien plätze, taken: Anzahl der belegten Plätze). Dabei werden die beiden entgegengesetzt in-/dekrementiert. Die Manipulation pop und push auf das Array sind über einen Mutex synchronisiert. Beispiel pop: wait(taken); lock(mutex); (auslesen und first auf den nächsten platz setzten) unlock(mutex), post(empty).
+   
+   Der Controler hat für jeden Thread eine Conditional Variable, mit der er die Threads blocken bzw. straten kann. Die Prüfung CV wird bei den Producern und beim Consumer jeweils am Anfang der Whileschleife gemacht.
+   
+   für die Fehlermeldungen wird ein Macro geschrieben der mit perror den wert errno auswertet, wenn kein EXIT\_SUCCESS zurückgegeben wird.
+
+   In der main-Methode werden die Threads und der Fifo initialisiert. Dann wartet die Main auf die Anweisung des Controllers (via Conditional Variable), bevor diese die Terminierung aller Threads einleitet.   
+      
+\end{document}

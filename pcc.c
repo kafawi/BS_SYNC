@@ -1,45 +1,34 @@
 #include "pcc.h"
+#include "errInfo.h"
 #include "fifo.h"
+#include "setting.h"
 
 void * produce(void * argProduce){
    ArgProduce * p = (ArgProduce *) argProduce;
-   pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-   //pthread_cond_t finish = PTHREAD_COND_INITIALIZER;
    int isAlive=1;
+   int e=0;
    unsigned int i=0;
-   //pthread_mutex_init(&mutex, NULL);
-   //pthread_cond_init(&finish, NULL);
-
-   while(isAlive){                 //alive
-      pthread_mutex_lock(&mutex);
-      //pthread_cond_wait(&(p->cond), &mutex);
-      sleep(WAIT_PRODUCE_SEK);
+   while(isAlive){
+      e=sleep(WAIT_PRODUCE_SEK);
       push(p->buffer, p->cList[i]);
       i++;
-      pthread_mutex_unlock(&mutex);
-
-      if (i >= sizeof(p->cList)){
-         //pthread_cond_signal(&finish);
+      if (i > 25){
          isAlive=0;
       }
-      //pthread_cond_wait(&finish, &mutex);
    }
    return 0;
 }
 
-
-void * consume(void * argConsume){
-   ArgConsume * p = (ArgConsume *) argConsume;
-   pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+void * consume(void * argConsume){//al
+   ArgConsume * p = (ArgConsume *) argConsume;//al
    int isAlive=1;
+   int e=0;
    char output = 0;
-   while(isAlive){                 //alive
-      pthread_mutex_lock(&mutex);
-      //pthread_cond_wait(&(p->cond), &mutex);
-      sleep(WAIT_CONSUME_SEK);
+   while(isAlive){
+      e = sleep(WAIT_CONSUME_SEK); //ERROUT(e);
       output = pop(p->buffer);
-      putchar(output);
-      pthread_mutex_unlock(&mutex);
+      // puts because putchar doesnt work, without a additional puts
+      e = puts(&output); //ERROUT(e);
    }
    return 0;
 }
@@ -52,15 +41,14 @@ void * control(void * argControl){
       tmp=getchar();
       switch(tmp){
          case'1':
-            pthread_cond_signal(&(p->condProduce1));
+            pthread_cond_signal(p->condProduce1);
             break;
          case'2':
-            pthread_cond_signal(&(p->condProduce2));
+            pthread_cond_signal(p->condProduce2);
             break;
-
          case'C':
          case'c':
-            pthread_cond_signal(&(p->condConsume));
+            pthread_cond_signal(p->condConsume);
             break;
          case 'Q':
          case 'q':

@@ -1,37 +1,36 @@
 # makrefile fuer Syncronisation and threads
 #
-BIN = proc
+BIN = proc.x
 
 CC = /usr/bin/gcc
 CFLAGS = -Wall -ggdb
 LDFLAGS = -lpthread
 
-SRH = fifo.h pcc.h errInfo.h
-SRC = errInfo.c fifo.c pcc.c main.c
+SRH = fifo.h pcc.h errInfo.h setting.h
+SRC = fifo.c pcc.c main.c
 OBJ = $(SRC:%.c=%.o)
-
-DEPENDFILE = .depend
+DEP = .depend
 
 ####
 all: $(BIN)
 
 # Berechne Abhaengigkeiten der SRC Datei
 #
-dep: $(SRC) $(SRH)
-	$(CC) -MM $(SRC) > $(DEPENDFILE)
+$(DEP): $(SRC) $(SRH)
+	$(CC) -MM $(SRC) > $(DEP)
 
--include $(DEPENDFILE)
-
+-include $(DEP)
 # Compilieren und linken
-$(BIN) : $(OBJ) $(SRC)
-	$(CC) -o $(BIN) $(OBJ) $(LDFLAGS)
+$(BIN) : $(OBJ)
+	$(CC) $(OBJ) -o $(BIN) $(LDFLAGS)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) -c $< $(CFLAGS)
+
 
 # laufen und Aufraeumen
 run: $(BIN)
 	./$(BIN)
 
 clean:
-	rm -rf $(BIN) *.o $(DEPENDFILE)
+	rm -rf $(DEP) $(BIN) $(OBJ)

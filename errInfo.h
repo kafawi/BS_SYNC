@@ -1,4 +1,3 @@
-
 #ifndef ERRINFO_H_
 #define ERRINFO_H_
 
@@ -6,15 +5,22 @@
 #include <errno.h>
 #include <string.h>
 
-#define ERROR_TXT "Failure in %s:"
+#define AT \
+   fprintf( stderr,\
+      "        at file %s function %s in line %d!", \
+      __FILE__ , __FUNCTION__ ,__LINE__ \
+   );
 
-int puterr(char * s, int fail);
+#define ERROUT(e) \
+   if (e < 0){ \
+      perror("Failure"); \
+      AT \
+   }
+#define MERROUT(p) \
+   if ( p == NULL ) { \
+      fprintf(stderr, "malloc faild, needs space!"); \
+      AT \
+   }
 
-// MACRO
-
-
-    #define MELDUNG(text) fprintf( stderr, \
-            "Datei [%s], Zeile %d: %s\n" \
-            __FILE__, __LINE__, text )
-
+int e;
 #endif /* ERRINFO_H_ */
