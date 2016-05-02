@@ -15,6 +15,8 @@ DEP = .depend
 all: $(BIN)
 
 # Berechne Abhaengigkeiten der SRC Datei
+# Defendence funktioniert noch nicht richtig.
+# undifind references danach.
 #
 $(DEP): $(SRC) $(SRH)
 	$(CC) -MM $(SRC) > $(DEP)

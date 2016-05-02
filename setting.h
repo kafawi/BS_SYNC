@@ -8,8 +8,8 @@
 #define FIFOSIZE 10
 
 //KONSTANTEN
-#define WAIT_CONSUME_SEK 2
-#define WAIT_PRODUCE_SEK 3
+#define WAIT_CONSUME_SEK 1
+#define WAIT_PRODUCE_SEK 1
 
 #define FALSE 0
 #define TRUE 1

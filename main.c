@@ -4,14 +4,9 @@
 #include <pthread.h>
 #include "setting.h"
 
-#define FIFOSIZE 10
-#define ABC_SIZE 26
-
-
 
    pthread_t producer1, producer2 , consumer, controler;
    pthread_cond_t prodBlock1, prodBlock2, consBlock,condQuit;
-   pthread_mutex_t mutexProd1, mutexProd2;
    int isAlive, isProdBlock1, isProdBlock2, isConsBlock;
    FifoT * buffer;
 
@@ -39,10 +34,6 @@ void init(){
    e=pthread_cond_init(&consBlock, NULL);ERROUT(e);
    e=pthread_cond_init(&prodBlock1, NULL);ERROUT(e);
    e=pthread_cond_init(&prodBlock2, NULL);ERROUT(e);
-   e=pthread_cond_init(&condQuit, NULL);ERROUT(e);
-
-   e=pthread_mutex_init(&mutexProd1, NULL);ERROUT(e);
-   e=pthread_mutex_init(&mutexProd2, NULL);ERROUT(e);
 
    argControl = (ArgControl*)malloc(sizeof(*argControl));
    MERROUT(argControl);
@@ -55,7 +46,6 @@ void init(){
    argControl->condCons=&consBlock;
    argControl->isConsBlock=&isConsBlock;
 
-   argControl->condQuit=&condQuit;
    argControl->isAlive=&isAlive;
 
 
@@ -71,7 +61,6 @@ void init(){
    argProduce1->buffer = buffer;
    argProduce1->cList = abcLowerCase;
    argProduce1->cond = &prodBlock1;
-   //argProduce1->mutex= &mutexProd1;
    argProduce1->isBlock =&isProdBlock1;
    argProduce1->isAlive =&isAlive;
 
@@ -81,7 +70,6 @@ void init(){
    argProduce2->buffer = buffer;
    argProduce2->cList = abcUpperCase;
    argProduce2->cond =&prodBlock2;
-   //argProduce2->mutex = &mutexProd2;
    argProduce2->isBlock=&isProdBlock2;
    argProduce2->isAlive =&isAlive;
 
@@ -99,20 +87,37 @@ void init(){
 
 
 void destroy(){
+      puts("start demolition");
+   // befreie Consumer und producer
+   e=pthread_cond_signal(argControl->condProd1); ERROUT(e);
+   e=pthread_cond_signal(argControl->condProd2); ERROUT(e);
+   e=pthread_cond_signal(argControl->condCons); ERROUT(e);
+   puts("befor free");
+   freeAll(buffer);
+   puts("after free");
+   pthread_join(producer1, NULL);
+   pthread_join(producer2, NULL);
+   pthread_join(consumer, NULL);
+   pthread_cond_destroy(argControl->condProd1);
+   pthread_cond_destroy(argControl->condProd2);
+   pthread_cond_destroy(argControl->condCons);
    free(argProduce1);
    free(argProduce2);
    free(argControl);
    free(argConsume);
-   pthread_cancel(consumer);
-   pthread_cancel(producer2);
-   pthread_cancel(producer1);
    destroyFifo(buffer);
 }
 
 int main(){
    init();
-   sleep(300);
-   //pthread_join(controler, NULL);
+   pthread_join(controler, NULL);
+   isAlive=FALSE; // kill
    destroy();
    return 0;
 }
+
+/*
+int kill(){
+   *argControl->isAlive=FALSE;
+}
+*/

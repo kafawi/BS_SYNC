@@ -10,9 +10,6 @@
 #include "fifo.h"
 #include "errInfo.h"
 
-#define WAIT_CONSUME_SEK 2
-#define WAIT_PRODUCE_SEK 3
-
 #define HELP_TXT "\
 1:   start/stop Producer for LowerCase\n \
 2:   start/stop Producer for UpperCase\n \
@@ -24,7 +21,6 @@ typedef struct {
    FifoT * buffer;
    char * cList;
    pthread_cond_t * cond;
-   pthread_mutex_t * mutex;
    int * isBlock;
    int * isAlive;
 } ArgProduce;
@@ -32,7 +28,6 @@ typedef struct {
 typedef struct {
    FifoT * buffer;
    pthread_cond_t * cond;
-   pthread_mutex_t *mutex;
    int * isBlock;
    int * isAlive;
 } ArgConsume;

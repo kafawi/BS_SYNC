@@ -9,7 +9,7 @@ void * produce(void * argProduce){
    e=pthread_mutex_init(&mutex, NULL);ERROUT(e);
    int e=0;
    unsigned int i=0;
-   while(p->isAlive){
+   while(*p->isAlive==TRUE){
       if (*p->isBlock==TRUE){
          e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
          *p->isBlock=FALSE;
@@ -22,6 +22,7 @@ void * produce(void * argProduce){
       }
    }
    e = pthread_mutex_destroy(&mutex); ERROUT(e);
+   pthread_exit(EXIT_SUCCESS);
    return 0;
 }
 
@@ -30,7 +31,7 @@ void * consume(void * argConsume){
    pthread_mutex_t mutex;
    e=pthread_mutex_init(&mutex, NULL);
    char output = 0;
-   while(p->isAlive){
+   while(*p->isAlive==TRUE){
       if (*p->isBlock==TRUE){
          e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
          *p->isBlock=FALSE;
@@ -43,13 +44,14 @@ void * consume(void * argConsume){
       e = puts(&output); ERROUT(e);
    }
    e = pthread_mutex_destroy(&mutex); ERROUT(e);
+   pthread_exit(EXIT_SUCCESS);
    return 0;
 }
 
 void * control(void * argControl){
    ArgControl * p = (ArgControl *) argControl;
    char tmp = 0;
-   while(p->isAlive){
+   while(*p->isAlive==TRUE){
       tmp=getchar();
       switch(tmp){
          case'1':
@@ -67,7 +69,6 @@ void * control(void * argControl){
             break;
          case 'Q':
          case 'q':
-            e=pthread_cond_signal(p->condQuit); ERROUT(e);
             pthread_exit(NULL);
             break;
          case 'H':

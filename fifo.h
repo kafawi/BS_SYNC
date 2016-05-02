@@ -25,4 +25,6 @@ char pop(FifoT *buffer);
 
 void destroyFifo(FifoT *buffer);
 
+void freeAll(FifoT *buffer);
+
 #endif /* FIFO_H_ */

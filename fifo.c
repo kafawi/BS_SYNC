@@ -51,3 +51,16 @@ void destroyFifo(FifoT *buffer){
    e = sem_destroy(&buffer->taken); ERROUT(e);
    free(buffer);
 }
+
+void freeAll(FifoT *buffer){
+   //Producer
+   int val;
+   e= sem_getvalue(&buffer->taken,&val ); ERROUT(e);
+   while(val<1){
+      e=sem_post(&buffer->taken);ERROUT(e);
+   }
+   e=sem_getvalue(&buffer->empty,&val);ERROUT(e);
+   while(val<1){
+      e=sem_post(&buffer->empty);ERROUT(e);
+   }
+}
