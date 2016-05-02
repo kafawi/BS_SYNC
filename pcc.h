@@ -24,6 +24,7 @@ typedef struct {
    FifoT * buffer;
    char * cList;
    pthread_cond_t * cond;
+   pthread_mutex_t * mutex;
    int * isBlock;
    int * isAlive;
 } ArgProduce;
@@ -31,6 +32,7 @@ typedef struct {
 typedef struct {
    FifoT * buffer;
    pthread_cond_t * cond;
+   pthread_mutex_t *mutex;
    int * isBlock;
    int * isAlive;
 } ArgConsume;

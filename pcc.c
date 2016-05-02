@@ -5,7 +5,8 @@
 
 void * produce(void * argProduce){
    ArgProduce * p = (ArgProduce *) argProduce;
-   pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
+   pthread_mutex_t mutex;
+   e=pthread_mutex_init(&mutex, NULL);ERROUT(e);
    int e=0;
    unsigned int i=0;
    while(p->isAlive){
@@ -26,19 +27,18 @@ void * produce(void * argProduce){
 
 void * consume(void * argConsume){
    ArgConsume * p = (ArgConsume *) argConsume;
-   pthread_mutex_t mutex=PTHREAD_MUTEX_INITIALIZER;
-   int e=0;
+   pthread_mutex_t mutex;
+   e=pthread_mutex_init(&mutex, NULL);
    char output = 0;
    while(p->isAlive){
       if (*p->isBlock==TRUE){
-         //e = pthread_mutex_lock(&mutex);ERROUT(e);
          e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
-         //e = pthread_mutex_unlock(&mutex);ERROUT(e);
          *p->isBlock=FALSE;
       }
 
       e = sleep(WAIT_CONSUME_SEK); ERROUT(e);
       output = pop(p->buffer);
+
       // puts because putchar doesnt work, without a additional puts
       e = puts(&output); ERROUT(e);
    }
