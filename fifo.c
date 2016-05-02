@@ -14,7 +14,7 @@ int initFifo(FifoT * buf, int size){
    buf->element =(char*)malloc( sizeof(*buf->element) *size);
    MERROUT(buf->element);
    for (i=0; i< size; i++){
-      buf->element[i]='a';
+      buf->element[i]=0;
    }
    return EXIT_SUCCESS;
 }
@@ -53,14 +53,10 @@ void destroyFifo(FifoT *buffer){
 }
 
 void freeAll(FifoT *buffer){
-   //Producer
-   int val;
-   e= sem_getvalue(&buffer->taken,&val ); ERROUT(e);
-   while(val<1){
-      e=sem_post(&buffer->taken);ERROUT(e);
-   }
-   e=sem_getvalue(&buffer->empty,&val);ERROUT(e);
-   while(val<1){
-      e=sem_post(&buffer->empty);ERROUT(e);
-   }
+
+   // Consumer just one time
+   e=sem_post(&buffer->empty);ERROUT(e);
+   //Producer two of them = two times
+   e= sem_post(&buffer->taken);ERROUT(e);
+   e= sem_post(&buffer->taken);ERROUT(e);
 }

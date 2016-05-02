@@ -10,15 +10,22 @@ void * produce(void * argProduce){
    int e=0;
    unsigned int i=0;
    while(*p->isAlive==TRUE){
+
       if (*p->isBlock==TRUE){
          e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
          *p->isBlock=FALSE;
+         // springt raus wenn tot
+         if (*p->isAlive==FALSE){
+            break;
+         }
       }
+
       e=sleep(WAIT_PRODUCE_SEK);
       push(p->buffer, p->cList[i]);
+      printf("Producer: %c\n", p->cList[i] );
       i++;
       if (p->cList[i]== 0){
-         break;
+         i=0;
       }
    }
    e = pthread_mutex_destroy(&mutex); ERROUT(e);
@@ -34,6 +41,10 @@ void * consume(void * argConsume){
    while(*p->isAlive==TRUE){
       if (*p->isBlock==TRUE){
          e = pthread_cond_wait(p->cond, &mutex);ERROUT(e);
+         // springt raus wenn tot
+         if (*p->isAlive==FALSE){
+            break;
+         }
          *p->isBlock=FALSE;
       }
 
